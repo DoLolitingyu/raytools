@@ -1,99 +1,101 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
     <title>Ray Tools</title>
-	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    
+    <!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" data-auto-replace-svg="nest"></script>
+
     <script src="raydreams.js"></script>
     <script src="people-data.js"></script>
-    
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    
+
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
     <script type="text/javascript">
 
-		// the data table itself
+        // the data table itself
         var dataTable = null;
 
         jQuery(document).ready(function () {
 
-        	dataTable = jQuery("#dataTable").raytable({
-            	datasource: { data: [], keyfield: 'id' },
-            	columns: [
-                    { title: "Info", icons: [{ glyph: "glyphicon-info-sign", handler: iconAction, data:"id" }], renderIf: isManager },
-                    { field: "firstName", title: "First Name", sort:true },
+            dataTable = jQuery("#dataTable").raytable({
+                datasource: { data: [], keyfield: 'id' },
+                columns: [
+                    { title: "Info", icons: [{ glyph: "fa-info-circle", handler: iconAction, data: "id" }], renderIf: isManager },
+                    { field: "firstName", title: "First Name", sort: true },
                     { field: "lastName", title: "Last Name", sort: true },
                     { field: "title", title: "Title" },
-                    { field: "grade", title: "Grade", sort: true },
-                    { field: "ssn", title: "SSN"  },
+                    { field: "grade", title: "Grade", sort: true},
+                    { field: "ssn", title: "SSN" },
                     { field: "birthDate", title: "DOB", sort: true, format: parseDate },
-                    { title: "Delete", icons: [{ glyph: "glyphicon-trash", handler: iconAction, data: "id" }] }
+                    { title: "Delete", icons: [{ glyph: "fa-trash", handler: iconAction, data: "id" }] }
                 ],
-            	pagesize: 17,
-            	maxPageButtons: 5,
-            	rowNumbers: true,
-            	rowClickHandler: rowAction
-        	});
+                pagesize: 17,
+                maxPageButtons: 5,
+                rowNumbers: true,
+                rowClickHandler: rowAction,
+                icons: { prefix: "fas", asc: "fa-sort-amount-up", desc: "fa-sort-amount-down"}
+            });
 
             jQuery(".glyphicon").css('cursor', 'pointer');
-            
+
             // load some default
             //doLoad(jQuery("#dataTable"));
-                                 
+
         });
-		
-		// load some data
+
+        // load some data
         function doLoad(sender) {
-        	// how many records to bind
-        	var size = jQuery("#sizeMenu").val();
-        	
-        	if (size < 0)
-            	{dataTable.data(myData,'id');}
-            else if (size == 0)
-            	{dataTable.data([],'id');}
-            else
-            	{dataTable.data(myData.slice(0,size),'id');}
+            // how many records to bind
+            var size = jQuery("#sizeMenu").val();
+
+            if (size < 0) { dataTable.data(myData, 'id'); }
+            else if (size == 0) { dataTable.data([], 'id'); }
+            else { dataTable.data(myData.slice(0, size), 'id'); }
         }
 
-		// icon clicked event handler
-        function iconAction(event)
-        {
+        // icon clicked event handler
+        function iconAction(event) {
             // jquery to get the record ID back out
             var data = jQuery(event.target).data('ray-data');
             alert('glyph icon data is ' + data);
             //alert('You clicked the icon with data = ' + event.data.id + ' on row ' + event.data.rowIdx );
         }
-        
+
         // row clicked handler
-        function rowAction(event)
-        {
+        function rowAction(event) {
             // jquery to get the record ID back out
             //var id = jQuery(event.target).data('ray-key');
-            alert('You clicked row ' + event.data.rowIdx + ' with object ID ' + event.data.id );
+            alert('You clicked row ' + event.data.rowIdx + ' with object ID ' + event.data.id);
         }
-        
+
         // boolean handler to determine if the cell content is rendered
-    	function isManager(item)
-    	{
-    		return (item.grade > 4);
-    	}
-    	
-    	// custom format handler
-    	function parseDate(item)
-    	{
-    		// source is ISO 8601
-    		var d = new Date(item.birthDate);
-    		return d.toDateString();
-    	}
+        function isManager(item) {
+            return (item.grade > 4);
+        }
+
+        // custom format handler
+        function parseDate(item) {
+            // source is ISO 8601
+            var d = new Date(item.birthDate);
+            return d.toDateString();
+        }
 
     </script>
+    <style type="text/css">
 
-	<style type="text/css">
-		#dataTable table tr:hover td { background-color: palegoldenrod; }
-	</style>
- 
+        #dataTable table tr:hover td {
+            background-color: palegoldenrod;
+        }
+    </style>
+
 </head>
 <body>
     <div style="margin:auto; width:80%">

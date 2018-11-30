@@ -21,7 +21,8 @@
 		currentSort: null, // the current field and direction of sorting
 		currentSelection: null, // last clicked row,
 		noDataLabel:"No Results", // label to display if there is no data in the grid
-		onRowClick: null // external handler when a row is clicked
+        onRowClick: null, // external handler when a row is clicked,
+        icons: { prefix: "fas", asc: "fa-sort-amount-up", desc: "fa-sort-amount-down" } // the icon libray class prefix - defaults to use Font Awesome
 	};
 
 	// iterates the data and fills in the table body
@@ -74,7 +75,8 @@
 				{
 					jQuery.each(base.headers[col].icons, function (idx, ic) {
 					
-						var colBtn = jQuery("<span class='glyphicon' aria-hidden='true' />");
+                        var colBtn = jQuery("<span aria-hidden='true' />");
+                        colBtn.addClass(base.icons.prefix);
 						colBtn.addClass(ic.glyph);
 						
 						if (ic.handler != null)
@@ -139,7 +141,10 @@
 			base.pageSize = options.pagesize;
 			
 		if (options.maxPageButtons != null && options.maxPageButtons > 0)
-			base.maxPageButtons = options.maxPageButtons;
+            base.maxPageButtons = options.maxPageButtons;
+
+        if (options.icons != null)
+            base.icons = options.icons;
 			
 		base.rowNumbers = options.rowNumbers;
 		base.onRowClick = options.rowClickHandler;
@@ -195,8 +200,12 @@
 				cell.css('width', h.width+'px');
 
 			if (h.sort)
-			{
-				var sortBtn = jQuery("<span class='glyphicon glyphicon-sort-by-attributes' style='color:LightGray' aria-hidden='true' />");
+            {
+                // default to sort descending
+                var sortBtn = jQuery("<span aria-hidden='true' />");
+                sortBtn.css({ 'color': '#D3D3D3' });
+                sortBtn.addClass(base.icons.prefix);
+                sortBtn.addClass(base.icons.desc);
 				cell.append('&nbsp;');
 				cell.append(sortBtn);
 				sortBtn.on('click', null, h.field, doSortCol);
@@ -224,8 +233,8 @@
 		// there's no data to display
 		if ( params.total < 1)
 		{
-			var summary = '<span id="raytable-footer-summary">' + base.noDataLabel + '</span>';
-			base.parentElem.find('#raytable-footer').append(summary);
+			var outer = '<span id="raytable-footer-summary">' + base.noDataLabel + '</span>';
+			base.parentElem.find('#raytable-footer').append(outer);
 			return;
 		}
 
@@ -257,7 +266,7 @@
 			if ( maxPage - startPage < totalPage )
 			{ startPage = maxPage - totalPage; }
 			
-			var first = jQuery('<li><a href="#" data="0" aria-label="Previous">&laquo;</a></li>');
+			var first = jQuery('<li class="page-item"><a class="page-link" href="#" data="0" aria-label="Previous">&laquo;</a></li>');
 			first.on("click", changePage);
 			pager.append(first);
 			
@@ -266,13 +275,14 @@
 			for (page = startPage; page < startPage + totalPage && page * base.pageSize < params.total ; ++page)
 			{
 				var li = (page == base.currentPageIdx) ? jQuery('<li class="active"></li>') : jQuery('<li></li>');
-				var anchor = jQuery('<a href="#" data="' + page + '">' + (page + 1) + '</a>');
+                var anchor = jQuery('<a class="page-link" href="#" data="' + page + '">' + (page + 1) + '</a>');
+                li.addClass('page-item');
 				li.append(anchor);
 				anchor.on("click", changePage);
 				pager.append(li);
 			}
 			
-			var last = jQuery('<li><a href="#" data="' + (maxPage-1) + '" aria-label="Next">&raquo;</a></li>');
+            var last = jQuery('<li class="page-item"><a class="page-link" href="#" data="' + (maxPage-1) + '" aria-label="Next">&raquo;</a></li>');
 			last.on("click", changePage);
 			pager.append(last);
 		}
@@ -316,17 +326,29 @@
 		base.onRowClick(event);
 	}
 
-	// sorts the bound data
-	function doSortCol(event) {
+	// sorts the bound data, field name is sent in event data
+    function doSortCol(event) {
+
+        // get the current sort object from its header
+        //var newCol = base.headers.find(function (h) { return h.field == event.data; });
+ 
+        // current sort is not set
 		if (base.currentSort == null)
-		{ base.currentSort = { field: event.data, direction: 1 }; }
+        {
+            base.currentSort = { field: event.data, direction: 1 };
+        }
+        // sort on a different field but same direction
 		else if (base.currentSort.field != event.data)
-		{ base.currentSort = { field: event.data, direction: base.currentSort.direction }; }
-		else
-		{ base.currentSort = { field: event.data, direction: base.currentSort.direction * -1 }; }
+        {
+            base.currentSort = { field: event.data, direction: base.currentSort.direction };
+        }
+		else // same field, toggle direction
+        {
+            base.currentSort = { field: event.data, direction: base.currentSort.direction * -1 };
+        }
 
 		// sort the data
-		base.datasource.data.sort( dynamicSort(event.data));
+		base.datasource.data.sort( dynamicSort(event.data) );
 
 		// reload the date and page back to start
 		base.currentPageIdx = 0;
@@ -336,9 +358,8 @@
 		if (base.currentSort.direction > 0)
 		{
 			base.parentElem.find('thead th span').each(
-				function (idx, elem) {
-					jQuery(elem).removeClass('glyphicon-sort-by-attributes-alt');
-					jQuery(elem).addClass('glyphicon-sort-by-attributes');
+                function (idx, elem) {
+                    jQuery(elem).removeClass(base.icons.desc).addClass(base.icons.prefix).addClass(base.icons.asc);
 					jQuery(elem).css('color', 'LightGray');
 				}
 				);
@@ -347,23 +368,24 @@
 		{
 			base.parentElem.find('thead th span').each(
 				function (idx, elem) {
-					jQuery(elem).removeClass('glyphicon-sort-by-attributes');
-					jQuery(elem).addClass('glyphicon-sort-by-attributes-alt');
+                    jQuery(elem).removeClass(base.icons.asc).addClass(base.icons.prefix).addClass(base.icons.desc);
 					jQuery(elem).css('color', 'LightGray');
 				}
 				);
-		}
-		jQuery(event.target).css('color', 'Black');
+        }
+
+        // set the color of the clicked sort icon to black
+        //var x = setTimeout(function () { jQuery(event.target).css({ 'color': '#000000' }); }, 2000);
 	}
 
 	// sort by a specified property, use prefix '-' to reverse the sort direction
 	function dynamicSort(property) {
 		var sortOrder = base.currentSort.direction;
 
-		return function (a, b) {
-			var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-			return result * sortOrder;
-		}
+        return function (a, b) {
+            var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+            return result * sortOrder;
+        };
 	}
 
 	// internal debug handler
